@@ -2,7 +2,7 @@
 <html lang="es" class="h-full bg-[#151418] text-[#E6E1E5] antialiased">
 <head>
     <meta charset="UTF-8">
-    <meta name="version" content="1.0.0">
+    <meta name="version" content="1.0.1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ComiFlow - Diagrama de Flujo Financiero Material 3</title>
     
@@ -157,10 +157,10 @@
 <body class="w-screen h-screen relative flex flex-col select-none">
 
     <!-- Cabecera Superior - Barra de Aplicación M3 (Top App Bar) -->
-    <header class="absolute top-0 left-0 right-0 z-50 bg-[#1D1B20]/90 backdrop-blur-md border-b border-[#4A4458] shadow-md pointer-events-auto">
+    <header class="absolute top-0 left-0 right-0 z-50 bg-[#1C1B1F]/90 backdrop-blur-md border-b border-[#49454F] shadow-md pointer-events-auto">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#4A4458] flex items-center justify-center text-[#D0BCFF] shadow-sm">
+                <div class="w-10 h-10 rounded-2xl bg-[#49454F] flex items-center justify-center text-[#D0BCFF] shadow-sm">
                     <span class="material-symbols-rounded">schema</span>
                 </div>
                 <div>
@@ -170,7 +170,7 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <button onclick="clearConnections()" class="m3-btn-ripple px-3 py-2 border border-[#4A4458] hover:bg-[#353041] text-[#D0BCFF] rounded-full text-xs font-semibold flex items-center gap-2 transition-colors">
+                <button onclick="clearConnections()" class="m3-btn-ripple px-3 py-2 border border-[#49454F] hover:bg-[#25242A] text-[#D0BCFF] rounded-full text-xs font-semibold flex items-center gap-2 transition-colors">
                     <span class="material-symbols-rounded text-base">link_off</span> 
                     <span class="hidden sm:block">Desconectar</span>
                 </button>
@@ -211,16 +211,16 @@
     </div>
 
     <!-- Controles Flotantes Inferiores de Zoom (Material 3 Surface) -->
-    <div class="absolute bottom-6 left-4 sm:left-6 z-40 flex items-center gap-1 bg-[#2B2930] border border-[#4A4458] p-1.5 rounded-2xl shadow-lg">
-        <button onclick="adjustZoom(0.1)" class="m3-btn-ripple w-9 h-9 rounded-xl hover:bg-[#353041] flex items-center justify-center text-[#E6E1E5]">
+    <div class="absolute bottom-6 left-4 sm:left-6 z-40 flex items-center gap-1 bg-[#25242A] border border-[#49454F] p-1.5 rounded-3xl shadow-lg">
+        <button onclick="adjustZoom(0.1)" class="m3-btn-ripple w-10 h-10 rounded-full hover:bg-[#332D41] flex items-center justify-center text-[#E6E1E5]">
             <span class="material-symbols-rounded text-lg">add</span>
         </button>
-        <span id="zoom-indicator" class="text-xs font-bold text-[#E6E1E5] px-2 font-mono">100%</span>
-        <button onclick="adjustZoom(-0.1)" class="m3-btn-ripple w-9 h-9 rounded-xl hover:bg-[#353041] flex items-center justify-center text-[#E6E1E5]">
+        <span id="zoom-indicator" class="text-xs font-bold text-[#E6E1E5] px-3 font-mono">100%</span>
+        <button onclick="adjustZoom(-0.1)" class="m3-btn-ripple w-10 h-10 rounded-full hover:bg-[#332D41] flex items-center justify-center text-[#E6E1E5]">
             <span class="material-symbols-rounded text-lg">remove</span>
         </button>
-        <div class="w-px h-6 bg-[#4A4458] mx-1.5"></div>
-        <button onclick="resetCanvasView()" class="m3-btn-ripple w-9 h-9 rounded-xl hover:bg-[#353041] flex items-center justify-center text-[#D0BCFF]" title="Centrar">
+        <div class="w-px h-6 bg-[#49454F] mx-1.5"></div>
+        <button onclick="resetCanvasView()" class="m3-btn-ripple w-10 h-10 rounded-full hover:bg-[#332D41] flex items-center justify-center text-[#D0BCFF]" title="Centrar">
             <span class="material-symbols-rounded text-lg">filter_center_focus</span>
         </button>
     </div>
@@ -232,28 +232,28 @@
     </button>
 
     <!-- Componente de Notificaciones Snackbar Android -->
-    <div id="m3-snackbar" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#313033] text-[#F4EFF4] text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-[#4A4458] translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="m3-snackbar" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#313033] text-[#F4EFF4] text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-[#49454F] translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <span class="material-symbols-rounded text-[#D0BCFF] text-lg" id="snackbar-icon">info</span>
         <span id="snackbar-text" class="font-medium">Mensaje informativo</span>
     </div>
 
     <!-- Menú Desplegable Lateral / Bottom Sheet Responsivo M3 -->
-    <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-[#151418]/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
-    <div id="sidebar" class="fixed bottom-0 right-0 h-[80vh] sm:h-full w-full sm:w-85 max-w-full sm:max-w-[400px] bg-[#1D1B20] border-t sm:border-t-0 sm:border-l border-[#4A4458] rounded-t-3xl sm:rounded-t-none shadow-2xl z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full sheet-transition flex flex-col">
+    <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-[#121212]/80 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <div id="sidebar" class="fixed bottom-0 right-0 h-[80vh] sm:h-full w-full sm:w-85 max-w-full sm:max-w-[400px] bg-[#1C1B1F] border-t sm:border-t-0 sm:border-l border-[#49454F] rounded-t-[32px] sm:rounded-t-none shadow-2xl z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full sheet-transition flex flex-col">
         
         <!-- Barra superior del Bottom Sheet -->
-        <div class="p-4 border-b border-[#4A4458] flex items-center justify-between bg-[#211F24] rounded-t-3xl sm:rounded-t-none">
+        <div class="p-5 border-b border-[#49454F] flex items-center justify-between bg-[#25242A] rounded-t-[32px] sm:rounded-t-none">
             <div>
                 <h3 class="text-xs font-bold uppercase tracking-wider text-[#D0BCFF]">Catálogo de Plataformas</h3>
-                <p class="text-[10px] text-[#938F99] mt-0.5">Selecciona un nodo para añadirlo al lienzo</p>
+                <p class="text-[10px] text-[#938F99] mt-1">Selecciona un nodo para añadirlo al lienzo</p>
             </div>
-            <button onclick="toggleSidebar(false)" class="m3-btn-ripple w-10 h-10 rounded-full hover:bg-[#2B2930] text-[#938F99] flex items-center justify-center transition-colors">
+            <button onclick="toggleSidebar(false)" class="m3-btn-ripple w-10 h-10 rounded-full hover:bg-[#332D41] text-[#938F99] flex items-center justify-center transition-colors">
                 <span class="material-symbols-rounded">close</span>
             </button>
         </div>
         
         <!-- Cuerpo del Catálogo -->
-        <div class="flex-grow overflow-y-auto p-4 space-y-6" id="catalog-container"></div>
+        <div class="flex-grow overflow-y-auto p-5 space-y-6" id="catalog-container"></div>
     </div>
 
     <!-- LÓGICA DE CONTROL DE LA APLICACIÓN -->
@@ -431,25 +431,25 @@
             cat.innerHTML = '';
             
             const groups = { 'util': 'Utilidades', 'nacional': 'Nacionales (Venezuela)', 'internacional': 'Internacionales / Billeteras' };
-            const colors = { 'util': 'bg-[#4A4458] text-[#EADDFF]', 'nacional': 'bg-[#5F1223] text-[#FFD9DD]', 'internacional': 'bg-[#0A4C6E] text-[#CBE6FF]' };
+            const colors = { 'util': 'bg-[#49454F] text-[#EADDFF]', 'nacional': 'bg-[#5F1223] text-[#FFD9DD]', 'internacional': 'bg-[#0A4C6E] text-[#CBE6FF]' };
 
             Object.keys(groups).forEach(catKey => {
                 const section = document.createElement('div');
-                section.innerHTML = `<h4 class="text-[10px] font-bold text-[#938F99] uppercase tracking-wider mb-2.5">${groups[catKey]}</h4>`;
+                section.innerHTML = `<h4 class="text-[10px] font-bold text-[#938F99] uppercase tracking-wider mb-3">${groups[catKey]}</h4>`;
                 
                 Object.values(platformDb).filter(p => p.category === catKey).forEach(p => {
                     const btn = document.createElement('div');
-                    btn.className = "m3-btn-ripple flex items-center gap-3 p-3 bg-[#2B2930] border border-[#4A4458] rounded-xl cursor-pointer hover:border-[#D0BCFF] transition-all mb-2 active:bg-[#353041]";
+                    btn.className = "m3-btn-ripple flex items-center gap-4 p-4 bg-[#25242A] border border-[#49454F] rounded-2xl cursor-pointer hover:border-[#D0BCFF] transition-all mb-3 active:bg-[#332D41]";
                     btn.onclick = () => { addNode(p.id); toggleSidebar(false); };
                     btn.innerHTML = `
-                        <div class="w-9 h-9 rounded-lg ${colors[catKey]} flex items-center justify-center shadow-inner">
+                        <div class="w-10 h-10 rounded-xl ${colors[catKey]} flex items-center justify-center shadow-inner">
                             <span class="material-symbols-rounded text-xl">${p.icon}</span>
                         </div>
                         <div class="flex-grow">
-                            <p class="text-xs font-bold text-[#E6E1E5]">${p.name}</p>
-                            <p class="text-[10px] text-[#938F99]">${p.fullName}</p>
+                            <p class="text-sm font-bold text-[#E6E1E5]">${p.name}</p>
+                            <p class="text-[11px] text-[#938F99] mt-0.5">${p.fullName}</p>
                         </div>
-                        <span class="material-symbols-rounded text-[#938F99] text-lg">add</span>
+                        <span class="material-symbols-rounded text-[#938F99] text-xl">add</span>
                     `;
                     section.appendChild(btn);
                 });
@@ -552,29 +552,29 @@
             if (!node.calcMode) node.calcMode = 'source';
 
             return `
-                <div class="bg-[#381E72] text-[#EADDFF] rounded-t-xl px-4 py-3 flex items-center gap-2 border-b border-[#4A4458]">
+                <div class="bg-[#381E72] text-[#EADDFF] rounded-t-2xl px-5 py-4 flex items-center gap-2 border-b border-[#49454F]">
                     <span class="material-symbols-rounded text-[#D0BCFF]">play_circle</span>
-                    <span class="font-bold text-xs uppercase tracking-widest">Origen de Fondos</span>
+                    <span class="font-bold text-sm uppercase tracking-widest">Origen de Fondos</span>
                 </div>
-                <div class="p-5 bg-[#2B2930] rounded-b-xl relative flex flex-col gap-4">
+                <div class="p-6 bg-[#25242A] rounded-b-2xl relative flex flex-col gap-5">
                     
                     <!-- Segmented Button (M3) -->
-                    <div class="flex bg-[#1D1B20] p-1 rounded-full border border-[#4A4458]">
-                        <button onclick="updateProp('${node.id}', 'calcMode', 'source')" class="m3-btn-ripple flex-1 py-2 text-[10px] font-bold rounded-full transition-all ${node.calcMode !== 'target' ? 'bg-[#353041] text-[#D0BCFF] shadow-sm' : 'text-[#938F99] hover:text-[#E6E1E5]' }">Lo que tengo</button>
-                        <button onclick="updateProp('${node.id}', 'calcMode', 'target')" class="m3-btn-ripple flex-1 py-2 text-[10px] font-bold rounded-full transition-all ${node.calcMode === 'target' ? 'bg-[#353041] text-[#D0BCFF] shadow-sm' : 'text-[#938F99] hover:text-[#E6E1E5]' }">Quiero recibir</button>
+                    <div class="flex bg-[#1C1B1F] p-1 rounded-full border border-[#49454F]">
+                        <button onclick="updateProp('${node.id}', 'calcMode', 'source')" class="m3-btn-ripple flex-1 py-2.5 text-xs font-bold rounded-full transition-all ${node.calcMode !== 'target' ? 'bg-[#332D41] text-[#D0BCFF] shadow-sm' : 'text-[#938F99] hover:text-[#E6E1E5]' }">Lo que tengo</button>
+                        <button onclick="updateProp('${node.id}', 'calcMode', 'target')" class="m3-btn-ripple flex-1 py-2.5 text-xs font-bold rounded-full transition-all ${node.calcMode === 'target' ? 'bg-[#332D41] text-[#D0BCFF] shadow-sm' : 'text-[#938F99] hover:text-[#E6E1E5]' }">Quiero recibir</button>
                     </div>
 
                     <!-- OutlinedTextField Jetpack Compose -->
                     <div class="m3-input-container">
-                        <input type="number" value="${node.baseAmount}" oninput="updateProp('${node.id}', 'baseAmount', this.value)" class="font-mono font-bold text-base">
+                        <input type="number" value="${node.baseAmount}" oninput="updateProp('${node.id}', 'baseAmount', this.value)" class="font-mono font-bold text-lg">
                         <span class="m3-input-label">${node.calcMode === 'target' ? 'Monto Neto deseado' : 'Monto de envío'}</span>
-                        <span class="absolute right-3 top-2.5 text-xs text-[#938F99] font-bold font-mono">$</span>
+                        <span class="absolute right-4 top-2.5 text-sm text-[#938F99] font-bold font-mono">$</span>
                     </div>
 
                     ${node.calcMode === 'target' ? `
-                    <div class="p-3 bg-[#211F24] border border-[#4A4458] rounded-xl flex justify-between items-center transition-all">
-                        <span class="text-[10px] font-extrabold text-[#D0BCFF] uppercase tracking-wide">Debes enviar:</span>
-                        <span id="calc-required-${node.id}" class="font-mono font-black text-[#D0BCFF] text-sm">$0.00</span>
+                    <div class="p-4 bg-[#1C1B1F] border border-[#49454F] rounded-xl flex justify-between items-center transition-all mt-1">
+                        <span class="text-xs font-extrabold text-[#D0BCFF] uppercase tracking-wide">Debes enviar:</span>
+                        <span id="calc-required-${node.id}" class="font-mono font-black text-[#D0BCFF] text-base">$0.00</span>
                     </div>
                     ` : ''}
 
@@ -586,16 +586,16 @@
         function getEndNodeHTML(node) {
             return `
                 ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-1/2 -translate-y-1/2', 'Recibir fondos')}
-                <div class="bg-[#211F24] text-[#E6E1E5] rounded-t-xl px-4 py-3 flex items-center justify-between border-b border-[#4A4458]">
+                <div class="bg-[#1C1B1F] text-[#E6E1E5] rounded-t-2xl px-5 py-4 flex items-center justify-between border-b border-[#49454F]">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-rounded text-[#D0BCFF]">inventory_2</span>
-                        <span class="font-bold text-xs uppercase tracking-widest">Resultado</span>
+                        <span class="font-bold text-sm uppercase tracking-widest">Resultado</span>
                     </div>
-                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-[#938F99] hover:text-[#FFB4AB]"><span class="material-symbols-rounded text-lg">delete</span></button>
+                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-[#938F99] hover:text-[#FFB4AB] p-1 rounded-full"><span class="material-symbols-rounded text-xl block">delete</span></button>
                 </div>
-                <div class="p-5 bg-[#2B2930] rounded-b-xl text-center relative border-t border-[#4A4458]/40">
-                    <span class="text-[10px] font-bold text-[#938F99] uppercase tracking-widest block mb-1">Neto Final Disponible</span>
-                    <span id="calc-in-${node.id}" class="text-2xl font-black text-[#D0BCFF] font-mono tracking-tight">$0.00</span>
+                <div class="p-6 bg-[#25242A] rounded-b-2xl text-center relative border-t border-[#49454F]/40">
+                    <span class="text-xs font-bold text-[#938F99] uppercase tracking-widest block mb-2">Neto Final Disponible</span>
+                    <span id="calc-in-${node.id}" class="text-3xl font-black text-[#D0BCFF] font-mono tracking-tight">$0.00</span>
                 </div>
             `;
         }
@@ -607,21 +607,21 @@
             const isACH = node.outMode === 'ach';
             
             return `
-                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-[4.5rem] -translate-y-1/2', 'Entrada')}
+                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-[5rem] -translate-y-1/2', 'Entrada')}
                 
-                <div class="${cBg} px-4 py-3 flex items-center justify-between rounded-t-xl border-b">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-rounded text-lg">${node.icon}</span>
-                        <span class="font-bold text-xs uppercase tracking-widest">${node.name}</span>
+                <div class="${cBg} px-5 py-4 flex items-center justify-between rounded-t-2xl border-b">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-rounded text-xl">${node.icon}</span>
+                        <span class="font-bold text-sm uppercase tracking-widest">${node.name}</span>
                     </div>
-                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-inherit/70 hover:text-white transition-colors"><span class="material-symbols-rounded text-lg">delete</span></button>
+                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-inherit/70 hover:text-white transition-colors p-1 rounded-full"><span class="material-symbols-rounded text-xl block">delete</span></button>
                 </div>
 
-                <div class="flex flex-col text-xs bg-[#2B2930] rounded-b-xl relative">
+                <div class="flex flex-col text-sm bg-[#25242A] rounded-b-2xl relative">
                     <!-- Outlined Select Component -->
-                    <div class="p-3 border-b border-[#4A4458]/50 bg-[#211F24]/50 flex items-center justify-between">
-                        <span class="font-semibold text-[#938F99] text-[11px] uppercase tracking-wider">Forma de Salida:</span>
-                        <select onchange="updateProp('${node.id}', 'outMode', this.value)" class="bg-[#1D1B20] border border-[#4A4458] rounded-lg p-2 text-xs outline-none focus:border-[#D0BCFF] font-medium text-[#E6E1E5] w-36">
+                    <div class="p-4 border-b border-[#49454F]/50 bg-[#1C1B1F]/50 flex items-center justify-between">
+                        <span class="font-semibold text-[#938F99] text-xs uppercase tracking-wider">Forma de Salida:</span>
+                        <select onchange="updateProp('${node.id}', 'outMode', this.value)" class="bg-[#1C1B1F] border border-[#49454F] rounded-lg p-2.5 text-sm outline-none focus:border-[#D0BCFF] font-medium text-[#E6E1E5] w-40">
                             <option value="balance" ${(!isCard && !isACH) ? 'selected' : ''}>Saldo (Directo)</option>
                             ${node.hasCard ? `<option value="card" ${isCard ? 'selected' : ''}>Tarjeta (Punto)</option>` : ''}
                             ${node.hasACH ? `<option value="ach" ${isACH ? 'selected' : ''}>ACH (Transf.)</option>` : ''}
@@ -629,35 +629,35 @@
                     </div>
 
                     <!-- Fila Recarga -->
-                    <div class="p-4 border-b border-[#4A4458]/50">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="font-semibold text-[#E6E1E5]">Comisión Recarga</span>
-                            <div class="relative w-20">
-                                <input type="number" value="${node.fees.recarga}" oninput="updateFee('${node.id}', 'recarga', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-[#D0BCFF]">
-                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                    <div class="p-5 border-b border-[#49454F]/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-semibold text-[#E6E1E5] text-sm">Comisión Recarga</span>
+                            <div class="relative w-24">
+                                <input type="number" value="${node.fees.recarga}" oninput="updateFee('${node.id}', 'recarga', this.value)" class="w-full bg-[#1C1B1F] border border-[#49454F] rounded-md px-3 py-1.5 text-right font-mono outline-none focus:border-[#D0BCFF] text-sm">
+                                <span class="absolute right-2.5 top-1.5 text-xs text-[#938F99]">%</span>
                             </div>
                         </div>
-                        <div class="flex justify-between text-[10px] text-[#938F99] mb-3 border-b border-[#4A4458]/30 pb-2">
+                        <div class="flex justify-between text-xs text-[#938F99] mb-4 border-b border-[#49454F]/40 pb-3">
                             <span>Recibe: <span id="calc-inAmt-${node.id}" class="font-mono text-[#E6E1E5]">$0.00</span></span>
                             <span class="text-[#FFB4AB]">Costo: <span id="calc-feeIn-${node.id}" class="font-mono">-$0.00</span></span>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-[#938F99] uppercase tracking-wide text-[10px]">Saldo Interno</span>
-                            <span id="calc-balance-${node.id}" class="font-mono font-bold text-[#E6E1E5]">$0.00</span>
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="font-bold text-[#938F99] uppercase tracking-wide text-[11px]">Saldo Interno</span>
+                            <span id="calc-balance-${node.id}" class="font-mono font-bold text-[#E6E1E5] text-sm">$0.00</span>
                         </div>
                     </div>
 
                     <!-- Fila Comisión de Salida (Tarjeta) -->
                     ${isCard ? `
-                    <div class="px-4 py-3 border-b border-[#4A4458]/50 bg-[#352F30]">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-semibold text-[#E6E1E5]">Comisión Tarjeta</span>
-                            <div class="relative w-20">
-                                <input type="number" value="${node.fees.tarjeta}" oninput="updateFee('${node.id}', 'tarjeta', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-[#D0BCFF]">
-                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                    <div class="px-5 py-4 border-b border-[#49454F]/50 bg-[#352F30]">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-[#E6E1E5] text-sm">Comisión Tarjeta</span>
+                            <div class="relative w-24">
+                                <input type="number" value="${node.fees.tarjeta}" oninput="updateFee('${node.id}', 'tarjeta', this.value)" class="w-full bg-[#1C1B1F] border border-[#49454F] rounded-md px-3 py-1.5 text-right font-mono outline-none focus:border-[#D0BCFF] text-sm">
+                                <span class="absolute right-2.5 top-1.5 text-xs text-[#938F99]">%</span>
                             </div>
                         </div>
-                        <div class="flex justify-between text-[10px] text-[#938F99]">
+                        <div class="flex justify-between text-xs text-[#938F99]">
                             <span class="text-[#FFB4AB]">Costo Uso: <span id="calc-feeOut-${node.id}" class="font-mono">-$0.00</span></span>
                         </div>
                     </div>
@@ -665,31 +665,31 @@
 
                     <!-- Fila Comisión de Salida (ACH) -->
                     ${isACH ? `
-                    <div class="px-4 py-3 border-b border-[#4A4458]/50 bg-[#2D2A35]">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-semibold text-[#E6E1E5]">Comisión ACH</span>
-                            <div class="flex gap-1 w-32 justify-end">
-                                <div class="relative w-14">
-                                    <input type="number" value="${node.fees.achPct !== undefined ? node.fees.achPct : 0.5}" oninput="updateFee('${node.id}', 'achPct', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-1 py-1 text-right font-mono outline-none focus:border-[#D0BCFF] text-xs">
-                                    <span class="absolute right-1 top-1 text-[9px] text-[#938F99]">%</span>
+                    <div class="px-5 py-4 border-b border-[#49454F]/50 bg-[#2D2A35]">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-[#E6E1E5] text-sm">Comisión ACH</span>
+                            <div class="flex gap-2 w-36 justify-end">
+                                <div class="relative w-16">
+                                    <input type="number" value="${node.fees.achPct !== undefined ? node.fees.achPct : 0.5}" oninput="updateFee('${node.id}', 'achPct', this.value)" class="w-full bg-[#1C1B1F] border border-[#49454F] rounded-md px-2 py-1.5 text-right font-mono outline-none focus:border-[#D0BCFF] text-xs">
+                                    <span class="absolute right-1 top-2 text-[10px] text-[#938F99]">%</span>
                                 </div>
                                 <span class="text-[#938F99] self-center font-bold">+</span>
-                                <div class="relative w-16">
-                                    <span class="absolute left-1 top-1 text-[9px] text-[#938F99]">$</span>
-                                    <input type="number" value="${node.fees.achFlat !== undefined ? node.fees.achFlat : 0.40}" oninput="updateFee('${node.id}', 'achFlat', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded pl-3 pr-1 py-1 text-right font-mono outline-none focus:border-[#D0BCFF] text-xs">
+                                <div class="relative w-20">
+                                    <span class="absolute left-1.5 top-1.5 text-[11px] text-[#938F99]">$</span>
+                                    <input type="number" value="${node.fees.achFlat !== undefined ? node.fees.achFlat : 0.40}" oninput="updateFee('${node.id}', 'achFlat', this.value)" class="w-full bg-[#1C1B1F] border border-[#49454F] rounded-md pl-5 pr-2 py-1.5 text-right font-mono outline-none focus:border-[#D0BCFF] text-xs">
                                 </div>
                             </div>
                         </div>
-                        <div class="flex justify-between text-[10px] text-[#938F99]">
+                        <div class="flex justify-between text-xs text-[#938F99]">
                             <span class="text-[#FFB4AB]">Costo ACH: <span id="calc-feeOut-${node.id}" class="font-mono">-$0.00</span></span>
                         </div>
                     </div>
                     ` : ''}
 
                     <!-- Total Salida M3 Accent Color -->
-                    <div class="p-4 bg-[#1D1B20]/40 rounded-b-xl flex justify-between items-center relative">
-                        <span class="font-bold ${isCard ? 'text-[#FFB4AB]' : (isACH ? 'text-[#BBC6E8]' : 'text-[#D0BCFF]')}">Total Salida</span>
-                        <span id="calc-outAmt-${node.id}" class="font-mono font-black text-[#E6E1E5] text-sm">$0.00</span>
+                    <div class="p-5 bg-[#1C1B1F]/60 rounded-b-2xl flex justify-between items-center relative">
+                        <span class="font-bold ${isCard ? 'text-[#FFB4AB]' : (isACH ? 'text-[#BBC6E8]' : 'text-[#D0BCFF]')} text-sm">Total Salida</span>
+                        <span id="calc-outAmt-${node.id}" class="font-mono font-black text-[#E6E1E5] text-base">$0.00</span>
                         
                         ${getPortHTML(node.id, 'out', 'out', 'port-out', 'right-0 translate-x-1/2 top-1/2 -translate-y-1/2', 'Salida Única')}
                     </div>
@@ -703,21 +703,21 @@
             const hasExtra = isBs || isUsdt;
             
             return `
-                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-[4.5rem] -translate-y-1/2', 'Entrada')}
+                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-[5rem] -translate-y-1/2', 'Entrada')}
                 
-                <div class="bg-[#0B532F] text-[#D1EEDC] border-[#0F7542] px-4 py-3 flex items-center justify-between rounded-t-xl border-b">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-rounded">phone_android</span>
-                        <span class="font-bold text-xs uppercase tracking-widest">Kontigo</span>
+                <div class="bg-[#0B532F] text-[#D1EEDC] border-[#0F7542] px-5 py-4 flex items-center justify-between rounded-t-2xl border-b">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-rounded text-xl">phone_android</span>
+                        <span class="font-bold text-sm uppercase tracking-widest">Kontigo</span>
                     </div>
-                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-inherit/70 hover:text-white transition-colors"><span class="material-symbols-rounded text-lg">delete</span></button>
+                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-inherit/70 hover:text-white transition-colors p-1 rounded-full"><span class="material-symbols-rounded text-xl block">delete</span></button>
                 </div>
 
-                <div class="flex flex-col text-xs bg-[#2B2930] rounded-b-xl relative">
+                <div class="flex flex-col text-sm bg-[#25242A] rounded-b-2xl relative">
                     <!-- Selector de Salida -->
-                    <div class="p-3 border-b border-[#4A4458]/50 bg-[#211F24]/50 flex items-center justify-between">
-                        <span class="font-semibold text-[#938F99] text-[11px] uppercase tracking-wider">Forma de Salida:</span>
-                        <select onchange="updateProp('${node.id}', 'outMode', this.value)" class="bg-[#1D1B20] border border-[#4A4458] rounded-lg p-2 text-xs outline-none focus:border-emerald-500 font-medium text-[#E6E1E5] w-36">
+                    <div class="p-4 border-b border-[#49454F]/50 bg-[#1C1B1F]/50 flex items-center justify-between">
+                        <span class="font-semibold text-[#938F99] text-xs uppercase tracking-wider">Forma de Salida:</span>
+                        <select onchange="updateProp('${node.id}', 'outMode', this.value)" class="bg-[#1C1B1F] border border-[#49454F] rounded-lg p-2.5 text-sm outline-none focus:border-emerald-500 font-medium text-[#E6E1E5] w-40">
                             <option value="balance" ${!hasExtra ? 'selected':''}>Saldo USD</option>
                             <option value="bs" ${isBs ? 'selected':''}>Pago Móvil (Bs)</option>
                             <option value="usdt" ${isUsdt ? 'selected':''}>Retiro USDT</option>
@@ -725,50 +725,50 @@
                     </div>
 
                     <!-- Fila Recarga -->
-                    <div class="p-4 border-b border-[#4A4458]/50">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="font-semibold text-[#E6E1E5]">Comisión Recarga</span>
-                            <div class="relative w-20">
-                                <input type="number" value="${node.fees.recarga}" oninput="updateFee('${node.id}', 'recarga', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-emerald-500">
-                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                    <div class="p-5 border-b border-[#49454F]/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-semibold text-[#E6E1E5] text-sm">Comisión Recarga</span>
+                            <div class="relative w-24">
+                                <input type="number" value="${node.fees.recarga}" oninput="updateFee('${node.id}', 'recarga', this.value)" class="w-full bg-[#1C1B1F] border border-[#49454F] rounded-md px-3 py-1.5 text-right font-mono outline-none focus:border-emerald-500 text-sm">
+                                <span class="absolute right-2.5 top-1.5 text-xs text-[#938F99]">%</span>
                             </div>
                         </div>
-                        <div class="flex justify-between text-[10px] text-[#938F99] mb-3 border-b border-[#4A4458]/30 pb-2">
+                        <div class="flex justify-between text-xs text-[#938F99] mb-4 border-b border-[#49454F]/40 pb-3">
                             <span>Recibe: <span id="calc-inAmt-${node.id}" class="font-mono text-[#E6E1E5]">$0.00</span></span>
                             <span class="text-[#FFB4AB]">Costo: <span id="calc-feeIn-${node.id}" class="font-mono">-$0.00</span></span>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-[#938F99] uppercase tracking-wide text-[10px]">Saldo Interno</span>
-                            <span id="calc-balance-${node.id}" class="font-mono font-bold text-[#E6E1E5]">$0.00</span>
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="font-bold text-[#938F99] uppercase tracking-wide text-[11px]">Saldo Interno</span>
+                            <span id="calc-balance-${node.id}" class="font-mono font-bold text-[#E6E1E5] text-sm">$0.00</span>
                         </div>
                     </div>
 
                     <!-- Comisión de Salida (Pago Móvil / USDT) -->
                     ${hasExtra ? `
-                    <div class="px-4 py-3 border-b border-[#4A4458]/50 bg-[#253238]">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-[#E6E1E5]">Comisión Retiro</span>
-                            <div class="relative w-20">
-                                <input type="number" value="${node.fees.extra}" oninput="updateFee('${node.id}', 'extra', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-emerald-500">
-                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                    <div class="px-5 py-4 border-b border-[#49454F]/50 bg-[#253238]">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-[#E6E1E5] text-sm">Comisión Retiro</span>
+                            <div class="relative w-24">
+                                <input type="number" value="${node.fees.extra}" oninput="updateFee('${node.id}', 'extra', this.value)" class="w-full bg-[#1C1B1F] border border-[#49454F] rounded-md px-3 py-1.5 text-right font-mono outline-none focus:border-emerald-500 text-sm">
+                                <span class="absolute right-2.5 top-1.5 text-xs text-[#938F99]">%</span>
                             </div>
                         </div>
                         ${isBs ? `
-                        <div class="flex justify-between items-center mt-3">
+                        <div class="flex justify-between items-center mt-4 pt-2 border-t border-[#49454F]/20">
                             <span class="font-semibold text-[#938F99] text-[11px] uppercase">Tasa de Cambio (Bs/$)</span>
-                            <input type="number" value="${node.tasa}" oninput="updateProp('${node.id}', 'tasa', this.value)" class="w-24 bg-[#1D1B20] border border-[#D0BCFF] rounded px-2 py-1 text-right font-mono outline-none text-[#D0BCFF]">
+                            <input type="number" value="${node.tasa}" oninput="updateProp('${node.id}', 'tasa', this.value)" class="w-28 bg-[#1C1B1F] border border-[#D0BCFF] rounded-md px-3 py-1.5 text-right font-mono outline-none text-[#D0BCFF] text-sm">
                         </div>
                         ` : ''}
-                        <div class="flex justify-between text-[10px] text-[#938F99] mt-3 border-t border-[#4A4458]/20 pt-2">
+                        <div class="flex justify-between text-xs text-[#938F99] mt-4 border-t border-[#49454F]/20 pt-3">
                             <span class="text-cyan-400">Costo Retiro: <span id="calc-feeOut-${node.id}" class="font-mono">-$0.00</span></span>
                         </div>
                     </div>
                     ` : ''}
 
                     <!-- Total Salida -->
-                    <div class="p-4 bg-[#1D1B20]/40 rounded-b-xl flex justify-between items-center relative">
-                        <span class="font-bold ${hasExtra ? 'text-cyan-400' : 'text-emerald-400'}">Total Salida</span>
-                        <span id="calc-outAmt-${node.id}" class="font-mono font-black text-[#E6E1E5] text-sm">$0.00</span>
+                    <div class="p-5 bg-[#1C1B1F]/60 rounded-b-2xl flex justify-between items-center relative">
+                        <span class="font-bold ${hasExtra ? 'text-cyan-400' : 'text-emerald-400'} text-sm">Total Salida</span>
+                        <span id="calc-outAmt-${node.id}" class="font-mono font-black text-[#E6E1E5] text-base">$0.00</span>
                         
                         ${getPortHTML(node.id, 'out', 'out', 'port-out', 'right-0 translate-x-1/2 top-1/2 -translate-y-1/2', 'Salida Única')}
                     </div>
