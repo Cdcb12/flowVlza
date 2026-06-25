@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#151418] text-[#E6E1E5] antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="version" content="1.0.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ComiFlow - Diagrama de Flujo Financiero Material 3</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter para Legibilidad & Material Symbols para Iconografía Nativa Android -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; 
+            user-select: none;
+            background-color: #151418;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Cuadrícula de diseño de ingeniería Figma / Blueprint Material */
+        .canvas-bg {
+            background-color: #151418;
+            background-image: 
+                linear-gradient(to right, #232128 1px, transparent 1px),
+                linear-gradient(to bottom, #232128 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Estilo de cables Bezier Material 3 */
+        .connection-cable {
+            stroke-dasharray: 6, 6;
+            animation: flow 1.2s linear infinite;
+            transition: stroke-width 0.3s, filter 0.3s;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+        }
+        .connection-cable:hover {
+            stroke-width: 5px !important;
+            cursor: no-drop; /* Indica que doble clic lo desconecta */
+            filter: drop-shadow(0 0 8px rgba(208, 188, 255, 0.6));
+        }
+        @keyframes flow { from { stroke-dashoffset: 12; } to { stroke-dashoffset: 0; } }
+
+        /* Puertos de interacción con Hitbox de 48px compatible con pantallas táctiles */
+        .port-wrapper {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            cursor: crosshair;
+            z-index: 40;
+        }
+        
+        /* El puerto en sí mismo que se ve en el lienzo */
+        .port-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #2B2930;
+            border: 3px solid;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            box-shadow: 0 0 0 2px rgba(21, 20, 24, 0.9);
+        }
+        .port-wrapper:hover .port-dot { 
+            transform: scale(1.4);
+            box-shadow: 0 0 0 4px rgba(208, 188, 255, 0.3);
+        }
+        
+        .port-in .port-dot { border-color: #938F99; }
+        .port-out .port-dot { border-color: #D0BCFF; }
+
+        /* Efecto de pulso en el puerto seleccionado */
+        .port-active { 
+            animation: pulse-port 0.8s infinite alternate; 
+            transform: scale(1.3); 
+        }
+        @keyframes pulse-port {
+            from { box-shadow: 0 0 0 0px rgba(208, 188, 255, 0.4); }
+            to { box-shadow: 0 0 0 8px rgba(208, 188, 255, 0.7); }
+        }
+
+        /* Nodos tipo tarjeta Material 3 */
+        .flow-node {
+            background: #2B2930;
+            border: 1px solid #4A4458;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: box-shadow 0.3s cubic-bezier(0.2, 0, 0, 1), border-color 0.3s cubic-bezier(0.2, 0, 0, 1);
+            width: 320px;
+        }
+        .flow-node:hover {
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+            border-color: #938F99;
+        }
+        
+        /* Ocultar flechas de campos numéricos */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* Transiciones fluidas del Bottom Sheet */
+        .sheet-transition {
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Estilo para simular Jetpack Compose OutlinedTextField */
+        .m3-input-container {
+            position: relative;
+        }
+        .m3-input-container input {
+            background: transparent;
+            color: #E6E1E5;
+            border: 1px solid #4A4458;
+            border-radius: 8px;
+            padding: 10px 12px;
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .m3-input-container input:focus {
+            border-color: #D0BCFF;
+            box-shadow: 0 0 0 1px #D0BCFF;
+        }
+        .m3-input-label {
+            position: absolute;
+            left: 8px;
+            top: -8px;
+            background: #2B2930;
+            padding: 0 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #938F99;
+            transition: color 0.2s;
+        }
+        .m3-input-container input:focus + .m3-input-label {
+            color: #D0BCFF;
+        }
+
+        /* Botón estilo M3 con efecto hover táctil */
+        .m3-btn-ripple {
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .m3-btn-ripple:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative flex flex-col select-none">
+
+    <!-- Cabecera Superior - Barra de Aplicación M3 (Top App Bar) -->
+    <header class="absolute top-0 left-0 right-0 z-50 bg-[#1D1B20]/90 backdrop-blur-md border-b border-[#4A4458] shadow-md pointer-events-auto">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#4A4458] flex items-center justify-center text-[#D0BCFF] shadow-sm">
+                    <span class="material-symbols-rounded">schema</span>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-wide text-[#E6E1E5]">ComiFlow</h1>
+                    <p class="text-[10px] text-[#938F99] font-medium tracking-wider uppercase">Material 3 Canvas</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="clearConnections()" class="m3-btn-ripple px-3 py-2 border border-[#4A4458] hover:bg-[#353041] text-[#D0BCFF] rounded-full text-xs font-semibold flex items-center gap-2 transition-colors">
+                    <span class="material-symbols-rounded text-base">link_off</span> 
+                    <span class="hidden sm:block">Desconectar</span>
+                </button>
+                <button onclick="toggleSidebar(true)" class="m3-btn-ripple flex items-center gap-2 px-4 py-2 bg-[#D0BCFF] hover:bg-[#EADDFF] text-[#381E72] rounded-full shadow-sm transition-colors text-xs font-bold">
+                    <span class="material-symbols-rounded text-base">add_box</span> 
+                    <span class="hidden sm:block">Agregar Nodo</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor del Lienzo Principal (Viewport) -->
+    <div id="canvas-viewport" class="w-full h-full relative overflow-hidden canvas-bg cursor-grab active:cursor-grabbing" onmousedown="startPan(event)" ontouchstart="startPan(event)">
+        <div id="canvas-board" class="absolute origin-top-left transition-transform duration-75" style="transform: translate(0px, 0px) scale(1);">
+            
+            <!-- Capa SVG para Cables -->
+            <svg id="cables-layer" class="absolute top-0 left-0 pointer-events-auto z-10" style="width: 5000px; height: 5000px;">
+                <defs>
+                    <linearGradient id="grad-balance" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#D0BCFF" />
+                        <stop offset="100%" stop-color="#938F99" />
+                    </linearGradient>
+                    <linearGradient id="grad-card" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#FFB4AB" />
+                        <stop offset="100%" stop-color="#938F99" />
+                    </linearGradient>
+                    <linearGradient id="grad-extra" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#BBC6E8" />
+                        <stop offset="100%" stop-color="#938F99" />
+                    </linearGradient>
+                </defs>
+                <path id="temp-cable" fill="none" stroke="#D0BCFF" stroke-width="3" stroke-dasharray="6,6" class="hidden" />
+            </svg>
+            
+            <!-- Capa de Nodos del Escenario -->
+            <div id="nodes-layer" class="absolute top-0 left-0 w-[5000px] h-[5000px] z-20 pointer-events-none"></div>
+        </div>
+    </div>
+
+    <!-- Controles Flotantes Inferiores de Zoom (Material 3 Surface) -->
+    <div class="absolute bottom-6 left-4 sm:left-6 z-40 flex items-center gap-1 bg-[#2B2930] border border-[#4A4458] p-1.5 rounded-2xl shadow-lg">
+        <button onclick="adjustZoom(0.1)" class="m3-btn-ripple w-9 h-9 rounded-xl hover:bg-[#353041] flex items-center justify-center text-[#E6E1E5]">
+            <span class="material-symbols-rounded text-lg">add</span>
+        </button>
+        <span id="zoom-indicator" class="text-xs font-bold text-[#E6E1E5] px-2 font-mono">100%</span>
+        <button onclick="adjustZoom(-0.1)" class="m3-btn-ripple w-9 h-9 rounded-xl hover:bg-[#353041] flex items-center justify-center text-[#E6E1E5]">
+            <span class="material-symbols-rounded text-lg">remove</span>
+        </button>
+        <div class="w-px h-6 bg-[#4A4458] mx-1.5"></div>
+        <button onclick="resetCanvasView()" class="m3-btn-ripple w-9 h-9 rounded-xl hover:bg-[#353041] flex items-center justify-center text-[#D0BCFF]" title="Centrar">
+            <span class="material-symbols-rounded text-lg">filter_center_focus</span>
+        </button>
+    </div>
+
+    <!-- Botón de Acción Flotante Principal (FAB) - Material 3 Large FAB -->
+    <button onclick="toggleSidebar(true)" class="m3-btn-ripple fixed bottom-6 right-6 z-40 flex items-center gap-3 px-5 py-4 bg-[#EADDFF] hover:bg-[#D0BCFF] text-[#21005D] rounded-2xl shadow-xl transition-all font-bold tracking-wide">
+        <span class="material-symbols-rounded text-2xl">add</span>
+        <span class="text-xs uppercase tracking-wider font-extrabold">Añadir Plataforma</span>
+    </button>
+
+    <!-- Componente de Notificaciones Snackbar Android -->
+    <div id="m3-snackbar" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#313033] text-[#F4EFF4] text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-[#4A4458] translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <span class="material-symbols-rounded text-[#D0BCFF] text-lg" id="snackbar-icon">info</span>
+        <span id="snackbar-text" class="font-medium">Mensaje informativo</span>
+    </div>
+
+    <!-- Menú Desplegable Lateral / Bottom Sheet Responsivo M3 -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-[#151418]/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <div id="sidebar" class="fixed bottom-0 right-0 h-[80vh] sm:h-full w-full sm:w-85 max-w-full sm:max-w-[400px] bg-[#1D1B20] border-t sm:border-t-0 sm:border-l border-[#4A4458] rounded-t-3xl sm:rounded-t-none shadow-2xl z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full sheet-transition flex flex-col">
+        
+        <!-- Barra superior del Bottom Sheet -->
+        <div class="p-4 border-b border-[#4A4458] flex items-center justify-between bg-[#211F24] rounded-t-3xl sm:rounded-t-none">
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[#D0BCFF]">Catálogo de Plataformas</h3>
+                <p class="text-[10px] text-[#938F99] mt-0.5">Selecciona un nodo para añadirlo al lienzo</p>
+            </div>
+            <button onclick="toggleSidebar(false)" class="m3-btn-ripple w-10 h-10 rounded-full hover:bg-[#2B2930] text-[#938F99] flex items-center justify-center transition-colors">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+        
+        <!-- Cuerpo del Catálogo -->
+        <div class="flex-grow overflow-y-auto p-4 space-y-6" id="catalog-container"></div>
+    </div>
+
+    <!-- LÓGICA DE CONTROL DE LA APLICACIÓN -->
+    <script>
+        const platformDb = {
+            'end': { id: 'end', name: 'Resultado', fullName: 'Caja Fuerte / Neto', category: 'util', color: 'indigo', icon: 'inventory_2' },
+            'bdv': { id: 'bdv', name: 'BDV', fullName: 'Banco de Venezuela', category: 'nacional', color: 'rose', icon: 'account_balance', hasCard: true, defaultFees: { recarga: 0, tarjeta: 2.5 } },
+            'bancamiga': { id: 'bancamiga', name: 'Bancamiga', fullName: 'Bancamiga Card', category: 'nacional', color: 'rose', icon: 'credit_card', hasCard: true, defaultFees: { recarga: 0, tarjeta: 5.0 } },
+            'kontigo': { id: 'kontigo', name: 'Kontigo', fullName: 'Billetera Multi-moneda', category: 'internacional', color: 'emerald', icon: 'phone_android', hasCard: false, defaultFees: { recarga: 3.5, extra: 5.0 } },
+            'wally': { id: 'wally', name: 'Wally', fullName: 'Wally Tech', category: 'internacional', color: 'sky', icon: 'wallet', hasCard: true, defaultFees: { recarga: 3.75, tarjeta: 2.85 } },
+            'zinli': { id: 'zinli', name: 'Zinli', fullName: 'Zinli Wallet', category: 'internacional', color: 'sky', icon: 'payments', hasCard: true, hasACH: true, defaultFees: { recarga: 3.75, tarjeta: 0, achPct: 0.5, achFlat: 0.40 } }
+        };
+
+        let nodes = [];
+        let connections = [];
+        let zoom = 1.0, panX = 120, panY = 120;
+        let isPanning = false, startX, startY;
+        let dragNode = null, dragOffsetX = 0, dragOffsetY = 0;
+        let activeCableDrag = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCatalog();
+            loadDefaultSetup();
+            applyCanvasTransform();
+            
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cancelCableDrag(); });
+            window.addEventListener('mousemove', handleGlobalMove);
+            window.addEventListener('mouseup', handleGlobalUp);
+            window.addEventListener('touchmove', handleGlobalMove, { passive: false });
+            window.addEventListener('touchend', handleGlobalUp);
+        });
+
+        // Alertas Visuales estilo M3 Snackbar
+        function showSnackbar(text, isError = false) {
+            const bar = document.getElementById('m3-snackbar');
+            const icon = document.getElementById('snackbar-icon');
+            const msg = document.getElementById('snackbar-text');
+            
+            icon.innerText = isError ? 'error' : 'check_circle';
+            icon.className = `material-symbols-rounded text-lg ${isError ? 'text-[#FFB4AB]' : 'text-[#D0BCFF]'}`;
+            msg.innerText = text;
+            
+            bar.classList.remove('translate-y-20', 'opacity-0');
+            bar.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                bar.classList.remove('translate-y-0', 'opacity-100');
+                bar.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function applyCanvasTransform() {
+            document.getElementById('canvas-board').style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+            document.getElementById('zoom-indicator').innerText = `${Math.round(zoom * 100)}%`;
+            drawCables();
+        }
+
+        function getClientPos(e) { 
+            return { x: e.touches ? e.touches[0].clientX : e.clientX, y: e.touches ? e.touches[0].clientY : e.clientY }; 
+        }
+
+        function startPan(e) {
+            if (e.target.closest('.port-wrapper') || e.target.closest('.flow-node') || e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
+            isPanning = true;
+            const pos = getClientPos(e);
+            startX = pos.x - panX; startY = pos.y - panY;
+            document.getElementById('canvas-viewport').classList.replace('cursor-grab', 'cursor-grabbing');
+        }
+
+        function handleGlobalMove(e) {
+            const pos = getClientPos(e);
+            if (isPanning) {
+                if (e.type === 'touchmove') e.preventDefault();
+                panX = pos.x - startX; panY = pos.y - startY;
+                applyCanvasTransform();
+            } else if (dragNode) {
+                if (e.type === 'touchmove') e.preventDefault();
+                dragNode.x = Math.max(0, Math.min((pos.x - dragOffsetX - panX) / zoom, 4000));
+                dragNode.y = Math.max(0, Math.min((pos.y - dragOffsetY - panY) / zoom, 4000));
+                const el = document.getElementById(`node-instance-${dragNode.id}`);
+                if (el) { el.style.left = `${dragNode.x}px`; el.style.top = `${dragNode.y}px`; }
+                drawCables();
+            } else if (activeCableDrag) {
+                if (e.type === 'touchmove') e.preventDefault();
+                updateTempCablePath(pos.x, pos.y);
+            }
+        }
+
+        function handleGlobalUp(e) {
+            isPanning = false; dragNode = null;
+            document.getElementById('canvas-viewport').classList.replace('cursor-grabbing', 'cursor-grab');
+            if (activeCableDrag && !e.target.closest('.port-wrapper')) cancelCableDrag();
+        }
+
+        function adjustZoom(amount) { zoom = Math.max(0.4, Math.min(1.5, zoom + amount)); applyCanvasTransform(); }
+        function resetCanvasView() { zoom = 1.0; panX = 120; panY = 120; applyCanvasTransform(); }
+
+        function startNodeDrag(nodeId, e) {
+            if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.port-wrapper') || e.target.closest('select')) return;
+            e.stopPropagation();
+            dragNode = nodes.find(n => n.id === nodeId);
+            if (!dragNode) return;
+            const pos = getClientPos(e);
+            dragOffsetX = pos.x - (dragNode.x * zoom + panX);
+            dragOffsetY = pos.y - (dragNode.y * zoom + panY);
+        }
+
+        function handlePortClick(nodeId, portId, portType, e) {
+            e.stopPropagation(); e.preventDefault();
+            
+            if (portType === 'in') {
+                if (activeCableDrag && activeCableDrag.fromNode !== nodeId) {
+                    completeConnection(nodeId, portId);
+                }
+                return;
+            }
+
+            const portEl = document.getElementById(`port-${nodeId}-${portId}`);
+            if (!portEl) return;
+
+            cancelCableDrag();
+            const rect = portEl.getBoundingClientRect();
+            const svgRect = document.getElementById('cables-layer').getBoundingClientRect();
+            
+            activeCableDrag = {
+                fromNode: nodeId, fromPort: portId,
+                startX: (rect.left + rect.width / 2 - svgRect.left) / zoom,
+                startY: (rect.top + rect.height / 2 - svgRect.top) / zoom
+            };
+
+            portEl.classList.add('port-active');
+            const pos = getClientPos(e);
+            updateTempCablePath(pos.x, pos.y);
+        }
+
+        function updateTempCablePath(screenX, screenY) {
+            if (!activeCableDrag) return;
+            const svgRect = document.getElementById('cables-layer').getBoundingClientRect();
+            const targetX = (screenX - svgRect.left) / zoom;
+            const targetY = (screenY - svgRect.top) / zoom;
+            const ctrl = Math.max(Math.abs(targetX - activeCableDrag.startX) * 0.6, 50);
+            
+            const path = `M ${activeCableDrag.startX} ${activeCableDrag.startY} C ${activeCableDrag.startX + ctrl} ${activeCableDrag.startY}, ${targetX - ctrl} ${targetY}, ${targetX} ${targetY}`;
+            const temp = document.getElementById('temp-cable');
+            temp.setAttribute('d', path);
+            temp.classList.remove('hidden');
+        }
+
+        function completeConnection(toNodeId, toPortId) {
+            if (!activeCableDrag) return;
+            connections = connections.filter(conn => !(conn.toNode === toNodeId && conn.toPort === toPortId));
+            
+            connections.push({ id: `c_${Date.now()}`, fromNode: activeCableDrag.fromNode, fromPort: activeCableDrag.fromPort, toNode: toNodeId, toPort: toPortId });
+            cancelCableDrag();
+            calculateFlow();
+            showSnackbar("Conexión del flujo establecida");
+        }
+
+        function cancelCableDrag() {
+            if (activeCableDrag) {
+                const p = document.getElementById(`port-${activeCableDrag.fromNode}-${activeCableDrag.fromPort}`);
+                if(p) p.classList.remove('port-active');
+            }
+            activeCableDrag = null;
+            document.getElementById('temp-cable').classList.add('hidden');
+        }
+        function clearConnections() { 
+            connections = []; 
+            calculateFlow(); 
+            showSnackbar("Se han desconectado todas las plataformas", true);
+        }
+
+        function renderCatalog() {
+            const cat = document.getElementById('catalog-container');
+            cat.innerHTML = '';
+            
+            const groups = { 'util': 'Utilidades', 'nacional': 'Nacionales (Venezuela)', 'internacional': 'Internacionales / Billeteras' };
+            const colors = { 'util': 'bg-[#4A4458] text-[#EADDFF]', 'nacional': 'bg-[#5F1223] text-[#FFD9DD]', 'internacional': 'bg-[#0A4C6E] text-[#CBE6FF]' };
+
+            Object.keys(groups).forEach(catKey => {
+                const section = document.createElement('div');
+                section.innerHTML = `<h4 class="text-[10px] font-bold text-[#938F99] uppercase tracking-wider mb-2.5">${groups[catKey]}</h4>`;
+                
+                Object.values(platformDb).filter(p => p.category === catKey).forEach(p => {
+                    const btn = document.createElement('div');
+                    btn.className = "m3-btn-ripple flex items-center gap-3 p-3 bg-[#2B2930] border border-[#4A4458] rounded-xl cursor-pointer hover:border-[#D0BCFF] transition-all mb-2 active:bg-[#353041]";
+                    btn.onclick = () => { addNode(p.id); toggleSidebar(false); };
+                    btn.innerHTML = `
+                        <div class="w-9 h-9 rounded-lg ${colors[catKey]} flex items-center justify-center shadow-inner">
+                            <span class="material-symbols-rounded text-xl">${p.icon}</span>
+                        </div>
+                        <div class="flex-grow">
+                            <p class="text-xs font-bold text-[#E6E1E5]">${p.name}</p>
+                            <p class="text-[10px] text-[#938F99]">${p.fullName}</p>
+                        </div>
+                        <span class="material-symbols-rounded text-[#938F99] text-lg">add</span>
+                    `;
+                    section.appendChild(btn);
+                });
+                cat.appendChild(section);
+            });
+        }
+
+        function getEmptyCalc() { 
+            return { inAmt: 0, inCur: 'USD', feeIn: 0, balance: 0, feeOut: 0, outAmt: 0, outCur: 'USD' }; 
+        }
+
+        function addNode(typeId, x = null, y = null) {
+            const p = platformDb[typeId];
+            const id = `node_${typeId}_${Date.now()}`;
+            
+            // Posicionamiento en el centro de la vista
+            const nx = x ?? Math.max(20, (-panX + window.innerWidth / 2 - 160) / zoom);
+            const ny = y ?? Math.max(20, (-panY + window.innerHeight / 2 - 100) / zoom);
+            
+            const node = {
+                id, type: typeId, name: p.name, icon: p.icon, color: p.color, x: nx, y: ny,
+                fees: p.defaultFees ? { ...p.defaultFees } : {},
+                hasCard: p.hasCard || false,
+                hasACH: p.hasACH || false,
+                outMode: 'balance', 
+                calc: getEmptyCalc()
+            };
+
+            if (typeId === 'kontigo') {
+                node.outMode = 'balance';
+                node.tasa = 40.00;
+            }
+
+            nodes.push(node);
+            renderAllNodes();
+            calculateFlow();
+            showSnackbar(`Se añadió ${p.name} al lienzo`);
+        }
+
+        function removeNode(id) {
+            if (id === 'start') return; 
+            const node = nodes.find(n => n.id === id);
+            nodes = nodes.filter(n => n.id !== id);
+            connections = connections.filter(c => c.fromNode !== id && c.toNode !== id);
+            renderAllNodes();
+            calculateFlow();
+            if (node) showSnackbar(`Se eliminó la plataforma ${node.name}`, true);
+        }
+
+        function loadDefaultSetup() {
+            nodes = [{ id: 'start', type: 'start', name: 'Origen de Fondos', x: 40, y: 180, baseAmount: 100.00, calc: getEmptyCalc() }];
+            addNode('bdv', 420, 150);
+            addNode('kontigo', 800, 180);
+            
+            setTimeout(() => {
+                const bdv = nodes.find(n => n.type === 'bdv');
+                const kon = nodes.find(n => n.type === 'kontigo');
+                if (bdv && kon) {
+                    bdv.outMode = 'card';
+                    connections = [
+                        { id: 'c1', fromNode: 'start', fromPort: 'out', toNode: bdv.id, toPort: 'in' },
+                        { id: 'c2', fromNode: bdv.id, fromPort: 'out', toNode: kon.id, toPort: 'in' }
+                    ];
+                    calculateFlow();
+                }
+            }, 100);
+        }
+
+        function renderAllNodes() {
+            const container = document.getElementById('nodes-layer');
+            container.innerHTML = '';
+            
+            nodes.forEach(node => {
+                const el = document.createElement('div');
+                el.id = `node-instance-${node.id}`;
+                el.className = "absolute pointer-events-auto flow-node cursor-grab active:cursor-grabbing flex flex-col";
+                el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+                el.addEventListener('mousedown', (e) => startNodeDrag(node.id, e));
+                el.addEventListener('touchstart', (e) => startNodeDrag(node.id, e), { passive: false });
+
+                if (node.type === 'start') el.innerHTML = getStartNodeHTML(node);
+                else if (node.type === 'end') el.innerHTML = getEndNodeHTML(node);
+                else if (node.type === 'kontigo') el.innerHTML = getKontigoNodeHTML(node);
+                else el.innerHTML = getStandardNodeHTML(node);
+
+                container.appendChild(el);
+            });
+            drawCables();
+        }
+
+        function getPortHTML(nodeId, portId, type, colorClass, alignClass, label = '') {
+            return `
+                <div class="port-wrapper ${alignClass}" onmousedown="handlePortClick('${nodeId}', '${portId}', '${type}', event)" ontouchstart="handlePortClick('${nodeId}', '${portId}', '${type}', event)">
+                    <div id="port-${nodeId}-${portId}" class="port-dot ${colorClass}" title="${label}"></div>
+                </div>`;
+        }
+
+        // --- RENDER COMPOSITIONS (MATERIAL 3 DESIGN) ---
+        function getStartNodeHTML(node) {
+            if (!node.calcMode) node.calcMode = 'source';
+
+            return `
+                <div class="bg-[#381E72] text-[#EADDFF] rounded-t-xl px-4 py-3 flex items-center gap-2 border-b border-[#4A4458]">
+                    <span class="material-symbols-rounded text-[#D0BCFF]">play_circle</span>
+                    <span class="font-bold text-xs uppercase tracking-widest">Origen de Fondos</span>
+                </div>
+                <div class="p-5 bg-[#2B2930] rounded-b-xl relative flex flex-col gap-4">
+                    
+                    <!-- Segmented Button (M3) -->
+                    <div class="flex bg-[#1D1B20] p-1 rounded-full border border-[#4A4458]">
+                        <button onclick="updateProp('${node.id}', 'calcMode', 'source')" class="m3-btn-ripple flex-1 py-2 text-[10px] font-bold rounded-full transition-all ${node.calcMode !== 'target' ? 'bg-[#353041] text-[#D0BCFF] shadow-sm' : 'text-[#938F99] hover:text-[#E6E1E5]' }">Lo que tengo</button>
+                        <button onclick="updateProp('${node.id}', 'calcMode', 'target')" class="m3-btn-ripple flex-1 py-2 text-[10px] font-bold rounded-full transition-all ${node.calcMode === 'target' ? 'bg-[#353041] text-[#D0BCFF] shadow-sm' : 'text-[#938F99] hover:text-[#E6E1E5]' }">Quiero recibir</button>
+                    </div>
+
+                    <!-- OutlinedTextField Jetpack Compose -->
+                    <div class="m3-input-container">
+                        <input type="number" value="${node.baseAmount}" oninput="updateProp('${node.id}', 'baseAmount', this.value)" class="font-mono font-bold text-base">
+                        <span class="m3-input-label">${node.calcMode === 'target' ? 'Monto Neto deseado' : 'Monto de envío'}</span>
+                        <span class="absolute right-3 top-2.5 text-xs text-[#938F99] font-bold font-mono">$</span>
+                    </div>
+
+                    ${node.calcMode === 'target' ? `
+                    <div class="p-3 bg-[#211F24] border border-[#4A4458] rounded-xl flex justify-between items-center transition-all">
+                        <span class="text-[10px] font-extrabold text-[#D0BCFF] uppercase tracking-wide">Debes enviar:</span>
+                        <span id="calc-required-${node.id}" class="font-mono font-black text-[#D0BCFF] text-sm">$0.00</span>
+                    </div>
+                    ` : ''}
+
+                    ${getPortHTML(node.id, 'out', 'out', 'port-out', 'right-0 translate-x-1/2 top-1/2 -translate-y-1/2', 'Conectar salida')}
+                </div>
+            `;
+        }
+
+        function getEndNodeHTML(node) {
+            return `
+                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-1/2 -translate-y-1/2', 'Recibir fondos')}
+                <div class="bg-[#211F24] text-[#E6E1E5] rounded-t-xl px-4 py-3 flex items-center justify-between border-b border-[#4A4458]">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-rounded text-[#D0BCFF]">inventory_2</span>
+                        <span class="font-bold text-xs uppercase tracking-widest">Resultado</span>
+                    </div>
+                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-[#938F99] hover:text-[#FFB4AB]"><span class="material-symbols-rounded text-lg">delete</span></button>
+                </div>
+                <div class="p-5 bg-[#2B2930] rounded-b-xl text-center relative border-t border-[#4A4458]/40">
+                    <span class="text-[10px] font-bold text-[#938F99] uppercase tracking-widest block mb-1">Neto Final Disponible</span>
+                    <span id="calc-in-${node.id}" class="text-2xl font-black text-[#D0BCFF] font-mono tracking-tight">$0.00</span>
+                </div>
+            `;
+        }
+
+        function getStandardNodeHTML(node) {
+            const isNac = platformDb[node.type]?.category === 'nacional';
+            const cBg = isNac ? 'bg-[#5F1223] text-[#FFD9DD] border-[#8C1D40]' : 'bg-[#0A4C6E] text-[#CBE6FF] border-[#005C8A]';
+            const isCard = node.outMode === 'card';
+            const isACH = node.outMode === 'ach';
+            
+            return `
+                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-[4.5rem] -translate-y-1/2', 'Entrada')}
+                
+                <div class="${cBg} px-4 py-3 flex items-center justify-between rounded-t-xl border-b">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-rounded text-lg">${node.icon}</span>
+                        <span class="font-bold text-xs uppercase tracking-widest">${node.name}</span>
+                    </div>
+                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-inherit/70 hover:text-white transition-colors"><span class="material-symbols-rounded text-lg">delete</span></button>
+                </div>
+
+                <div class="flex flex-col text-xs bg-[#2B2930] rounded-b-xl relative">
+                    <!-- Outlined Select Component -->
+                    <div class="p-3 border-b border-[#4A4458]/50 bg-[#211F24]/50 flex items-center justify-between">
+                        <span class="font-semibold text-[#938F99] text-[11px] uppercase tracking-wider">Forma de Salida:</span>
+                        <select onchange="updateProp('${node.id}', 'outMode', this.value)" class="bg-[#1D1B20] border border-[#4A4458] rounded-lg p-2 text-xs outline-none focus:border-[#D0BCFF] font-medium text-[#E6E1E5] w-36">
+                            <option value="balance" ${(!isCard && !isACH) ? 'selected' : ''}>Saldo (Directo)</option>
+                            ${node.hasCard ? `<option value="card" ${isCard ? 'selected' : ''}>Tarjeta (Punto)</option>` : ''}
+                            ${node.hasACH ? `<option value="ach" ${isACH ? 'selected' : ''}>ACH (Transf.)</option>` : ''}
+                        </select>
+                    </div>
+
+                    <!-- Fila Recarga -->
+                    <div class="p-4 border-b border-[#4A4458]/50">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-[#E6E1E5]">Comisión Recarga</span>
+                            <div class="relative w-20">
+                                <input type="number" value="${node.fees.recarga}" oninput="updateFee('${node.id}', 'recarga', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-[#D0BCFF]">
+                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-[#938F99] mb-3 border-b border-[#4A4458]/30 pb-2">
+                            <span>Recibe: <span id="calc-inAmt-${node.id}" class="font-mono text-[#E6E1E5]">$0.00</span></span>
+                            <span class="text-[#FFB4AB]">Costo: <span id="calc-feeIn-${node.id}" class="font-mono">-$0.00</span></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-[#938F99] uppercase tracking-wide text-[10px]">Saldo Interno</span>
+                            <span id="calc-balance-${node.id}" class="font-mono font-bold text-[#E6E1E5]">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Fila Comisión de Salida (Tarjeta) -->
+                    ${isCard ? `
+                    <div class="px-4 py-3 border-b border-[#4A4458]/50 bg-[#352F30]">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold text-[#E6E1E5]">Comisión Tarjeta</span>
+                            <div class="relative w-20">
+                                <input type="number" value="${node.fees.tarjeta}" oninput="updateFee('${node.id}', 'tarjeta', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-[#D0BCFF]">
+                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-[#938F99]">
+                            <span class="text-[#FFB4AB]">Costo Uso: <span id="calc-feeOut-${node.id}" class="font-mono">-$0.00</span></span>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Fila Comisión de Salida (ACH) -->
+                    ${isACH ? `
+                    <div class="px-4 py-3 border-b border-[#4A4458]/50 bg-[#2D2A35]">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold text-[#E6E1E5]">Comisión ACH</span>
+                            <div class="flex gap-1 w-32 justify-end">
+                                <div class="relative w-14">
+                                    <input type="number" value="${node.fees.achPct !== undefined ? node.fees.achPct : 0.5}" oninput="updateFee('${node.id}', 'achPct', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-1 py-1 text-right font-mono outline-none focus:border-[#D0BCFF] text-xs">
+                                    <span class="absolute right-1 top-1 text-[9px] text-[#938F99]">%</span>
+                                </div>
+                                <span class="text-[#938F99] self-center font-bold">+</span>
+                                <div class="relative w-16">
+                                    <span class="absolute left-1 top-1 text-[9px] text-[#938F99]">$</span>
+                                    <input type="number" value="${node.fees.achFlat !== undefined ? node.fees.achFlat : 0.40}" oninput="updateFee('${node.id}', 'achFlat', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded pl-3 pr-1 py-1 text-right font-mono outline-none focus:border-[#D0BCFF] text-xs">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-[#938F99]">
+                            <span class="text-[#FFB4AB]">Costo ACH: <span id="calc-feeOut-${node.id}" class="font-mono">-$0.00</span></span>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Total Salida M3 Accent Color -->
+                    <div class="p-4 bg-[#1D1B20]/40 rounded-b-xl flex justify-between items-center relative">
+                        <span class="font-bold ${isCard ? 'text-[#FFB4AB]' : (isACH ? 'text-[#BBC6E8]' : 'text-[#D0BCFF]')}">Total Salida</span>
+                        <span id="calc-outAmt-${node.id}" class="font-mono font-black text-[#E6E1E5] text-sm">$0.00</span>
+                        
+                        ${getPortHTML(node.id, 'out', 'out', 'port-out', 'right-0 translate-x-1/2 top-1/2 -translate-y-1/2', 'Salida Única')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getKontigoNodeHTML(node) {
+            const isBs = node.outMode === 'bs';
+            const isUsdt = node.outMode === 'usdt';
+            const hasExtra = isBs || isUsdt;
+            
+            return `
+                ${getPortHTML(node.id, 'in', 'in', 'port-in', 'left-0 -translate-x-1/2 top-[4.5rem] -translate-y-1/2', 'Entrada')}
+                
+                <div class="bg-[#0B532F] text-[#D1EEDC] border-[#0F7542] px-4 py-3 flex items-center justify-between rounded-t-xl border-b">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-rounded">phone_android</span>
+                        <span class="font-bold text-xs uppercase tracking-widest">Kontigo</span>
+                    </div>
+                    <button onclick="removeNode('${node.id}')" class="m3-btn-ripple text-inherit/70 hover:text-white transition-colors"><span class="material-symbols-rounded text-lg">delete</span></button>
+                </div>
+
+                <div class="flex flex-col text-xs bg-[#2B2930] rounded-b-xl relative">
+                    <!-- Selector de Salida -->
+                    <div class="p-3 border-b border-[#4A4458]/50 bg-[#211F24]/50 flex items-center justify-between">
+                        <span class="font-semibold text-[#938F99] text-[11px] uppercase tracking-wider">Forma de Salida:</span>
+                        <select onchange="updateProp('${node.id}', 'outMode', this.value)" class="bg-[#1D1B20] border border-[#4A4458] rounded-lg p-2 text-xs outline-none focus:border-emerald-500 font-medium text-[#E6E1E5] w-36">
+                            <option value="balance" ${!hasExtra ? 'selected':''}>Saldo USD</option>
+                            <option value="bs" ${isBs ? 'selected':''}>Pago Móvil (Bs)</option>
+                            <option value="usdt" ${isUsdt ? 'selected':''}>Retiro USDT</option>
+                        </select>
+                    </div>
+
+                    <!-- Fila Recarga -->
+                    <div class="p-4 border-b border-[#4A4458]/50">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-[#E6E1E5]">Comisión Recarga</span>
+                            <div class="relative w-20">
+                                <input type="number" value="${node.fees.recarga}" oninput="updateFee('${node.id}', 'recarga', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-emerald-500">
+                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-[#938F99] mb-3 border-b border-[#4A4458]/30 pb-2">
+                            <span>Recibe: <span id="calc-inAmt-${node.id}" class="font-mono text-[#E6E1E5]">$0.00</span></span>
+                            <span class="text-[#FFB4AB]">Costo: <span id="calc-feeIn-${node.id}" class="font-mono">-$0.00</span></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-[#938F99] uppercase tracking-wide text-[10px]">Saldo Interno</span>
+                            <span id="calc-balance-${node.id}" class="font-mono font-bold text-[#E6E1E5]">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Comisión de Salida (Pago Móvil / USDT) -->
+                    ${hasExtra ? `
+                    <div class="px-4 py-3 border-b border-[#4A4458]/50 bg-[#253238]">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-[#E6E1E5]">Comisión Retiro</span>
+                            <div class="relative w-20">
+                                <input type="number" value="${node.fees.extra}" oninput="updateFee('${node.id}', 'extra', this.value)" class="w-full bg-[#1D1B20] border border-[#4A4458] rounded px-2 py-1 text-right font-mono outline-none focus:border-emerald-500">
+                                <span class="absolute right-2 top-1 text-[10px] text-[#938F99]">%</span>
+                            </div>
+                        </div>
+                        ${isBs ? `
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="font-semibold text-[#938F99] text-[11px] uppercase">Tasa de Cambio (Bs/$)</span>
+                            <input type="number" value="${node.tasa}" oninput="updateProp('${node.id}', 'tasa', this.value)" class="w-24 bg-[#1D1B20] border border-[#D0BCFF] rounded px-2 py-1 text-right font-mono outline-none text-[#D0BCFF]">
+                        </div>
+                        ` : ''}
+                        <div class="flex justify-between text-[10px] text-[#938F99] mt-3 border-t border-[#4A4458]/20 pt-2">
+                            <span class="text-cyan-400">Costo Retiro: <span id="calc-feeOut-${node.id}" class="font-mono">-$0.00</span></span>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Total Salida -->
+                    <div class="p-4 bg-[#1D1B20]/40 rounded-b-xl flex justify-between items-center relative">
+                        <span class="font-bold ${hasExtra ? 'text-cyan-400' : 'text-emerald-400'}">Total Salida</span>
+                        <span id="calc-outAmt-${node.id}" class="font-mono font-black text-[#E6E1E5] text-sm">$0.00</span>
+                        
+                        ${getPortHTML(node.id, 'out', 'out', 'port-out', 'right-0 translate-x-1/2 top-1/2 -translate-y-1/2', 'Salida Única')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- SISTEMA REACTIVO DE PROPIEDADES ---
+        function updateProp(id, prop, val) {
+            const n = nodes.find(n => n.id === id);
+            if(n) { 
+                let needsRender = false;
+                if (prop === 'outMode' || prop === 'calcMode') {
+                    n[prop] = val; 
+                    needsRender = true; 
+                } else {
+                    n[prop] = Math.max(0, parseFloat(val) || 0); 
+                }
+                
+                if(prop === 'outMode') {
+                    if (val === 'bs' && n.type === 'kontigo') n.fees.extra = 5.0;
+                    if (val === 'usdt' && n.type === 'kontigo') n.fees.extra = 1.5;
+                    if (val === 'ach' && n.type === 'zinli') {
+                        n.fees.achPct = 0.5;
+                        n.fees.achFlat = 0.40;
+                    }
+                }
+                
+                if (needsRender) {
+                    renderAllNodes(); 
+                }
+                calculateFlow(); 
+            }
+        }
+        function updateFee(id, f, val) {
+            const n = nodes.find(n => n.id === id);
+            if(n) { n.fees[f] = Math.max(0, parseFloat(val) || 0); calculateFlow(); }
+        }
+        
+        function toggleSidebar(show) {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            
+            // Bottom Sheet en móviles, Navigation Drawer en Desktop
+            if (show) {
+                sidebar.classList.remove('translate-y-full', 'sm:translate-x-full');
+                sidebar.classList.add('translate-y-0', 'sm:translate-x-0');
+                backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                backdrop.classList.add('opacity-100');
+            } else {
+                sidebar.classList.add('translate-y-full', 'sm:translate-x-full');
+                sidebar.classList.remove('translate-y-0', 'sm:translate-x-0');
+                backdrop.classList.remove('opacity-100');
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function formatMoney(amount, cur) {
+            const prefix = cur === 'Bs' ? 'Bs ' : (cur === 'USDT' ? '₮ ' : '$');
+            return prefix + amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // --- MOTOR MATEMÁTICO AVANZADO (PROCESAMIENTO BIDIRECCIONAL) ---
+        function calculateFlow() {
+            const startNode = nodes.find(n => n.id === 'start');
+            if(!startNode) return;
+
+            const runSimulation = (startAmount) => {
+                nodes.forEach(n => { n.calc = getEmptyCalc(); });
+                let resolved = { 'start': true };
+                startNode.calc.outAmt = startAmount;
+                startNode.calc.outCur = 'USD';
+
+                function pushValues() {
+                    let changed = false;
+                    
+                    connections.forEach(conn => {
+                        const src = nodes.find(n => n.id === conn.fromNode);
+                        const tgt = nodes.find(n => n.id === conn.toNode);
+                        
+                        if (src && tgt && resolved[src.id] && !resolved[tgt.id]) {
+                            let amt = src.calc.outAmt;
+                            let cur = src.calc.outCur;
+
+                            tgt.calc.inAmt = amt;
+                            tgt.calc.inCur = cur;
+
+                            if (tgt.type !== 'end') {
+                                // 1. Descontar Comisión de Entrada (Recarga)
+                                tgt.calc.feeIn = amt * ((tgt.fees.recarga || 0) / 100);
+                                tgt.calc.balance = amt - tgt.calc.feeIn;
+                                tgt.calc.outCur = cur; 
+                                
+                                // 2. Descontar Comisión de Salida según Método Seleccionado
+                                if (tgt.outMode === 'card') {
+                                    tgt.calc.feeOut = tgt.calc.balance * ((tgt.fees.tarjeta || 0) / 100);
+                                    tgt.calc.outAmt = tgt.calc.balance - tgt.calc.feeOut;
+                                } else if (tgt.outMode === 'ach') {
+                                    let pctFee = tgt.calc.balance * ((tgt.fees.achPct || 0) / 100);
+                                    let flatFee = (tgt.fees.achFlat || 0);
+                                    tgt.calc.feeOut = pctFee + flatFee;
+                                    tgt.calc.outAmt = tgt.calc.balance - tgt.calc.feeOut;
+                                } else if (tgt.outMode === 'bs') {
+                                    tgt.calc.feeOut = tgt.calc.balance * ((tgt.fees.extra || 0) / 100);
+                                    let rem = tgt.calc.balance - tgt.calc.feeOut;
+                                    tgt.calc.outAmt = rem * (tgt.tasa || 1); 
+                                    tgt.calc.outCur = 'Bs'; 
+                                } else if (tgt.outMode === 'usdt') {
+                                    tgt.calc.feeOut = tgt.calc.balance * ((tgt.fees.extra || 0) / 100);
+                                    tgt.calc.outAmt = tgt.calc.balance - tgt.calc.feeOut;
+                                    tgt.calc.outCur = 'USDT';
+                                } else {
+                                    tgt.calc.outAmt = tgt.calc.balance;
+                                }
+                            }
+                            
+                            resolved[tgt.id] = true;
+                            changed = true;
+                        }
+                    });
+                    
+                    if(changed) pushValues(); 
+                }
+                pushValues();
+            };
+
+            // Ejecución según Modo Seleccionado
+            if (startNode.calcMode === 'target') {
+                // Cálculo de Regresión Lineal Integral (Resuelve Tarifas Mixtas Porcentaje + Fijas)
+                const getArrived = () => {
+                    let endNodes = nodes.filter(n => n.type === 'end' && n.calc.inAmt > 0);
+                    if (endNodes.length > 0) return endNodes[0].calc.inAmt;
+                    let processedNodes = nodes.filter(n => n.id !== 'start' && n.calc.inAmt > 0);
+                    if (processedNodes.length > 0) return processedNodes[processedNodes.length - 1].calc.outAmt || processedNodes[processedNodes.length - 1].calc.inAmt;
+                    return 0;
+                };
+
+                runSimulation(0);
+                let y1 = getArrived(); 
+
+                runSimulation(1000);
+                let y2 = getArrived(); 
+
+                let m = (y2 - y1) / 1000; 
+                let b = y1;
+                
+                let requiredAmount = startNode.baseAmount;
+                if (m > 0) {
+                    requiredAmount = (startNode.baseAmount - b) / m;
+                    requiredAmount = Math.max(0, requiredAmount); 
+                }
+                
+                runSimulation(requiredAmount);
+                startNode.calc.requiredStart = requiredAmount; 
+
+            } else {
+                runSimulation(startNode.baseAmount);
+            }
+
+            updateDOM();
+        }
+
+        // Actualizaciones de UI directas sin interrupción de Focus táctil
+        function updateDOM() {
+            nodes.forEach(node => {
+                if (node.type === 'start') {
+                    if (node.calcMode === 'target') {
+                        const el = document.getElementById(`calc-required-${node.id}`);
+                        if (el) el.innerText = formatMoney(node.calc.requiredStart || 0, 'USD');
+                    }
+                } else if (node.type === 'end') {
+                    const el = document.getElementById(`calc-in-${node.id}`);
+                    if (el) el.innerText = formatMoney(node.calc.inAmt, node.calc.inCur);
+                } else {
+                    const q = (id) => document.getElementById(`calc-${id}-${node.id}`);
+                    
+                    if(q('inAmt')) q('inAmt').innerText = formatMoney(node.calc.inAmt, node.calc.inCur);
+                    if(q('feeIn')) q('feeIn').innerText = '-' + formatMoney(node.calc.feeIn, node.calc.inCur);
+                    if(q('balance')) q('balance').innerText = formatMoney(node.calc.balance, node.calc.inCur);
+                    
+                    if(q('feeOut')) q('feeOut').innerText = '-' + formatMoney(node.calc.feeOut, node.calc.inCur);
+                    if(q('outAmt')) q('outAmt').innerText = formatMoney(node.calc.outAmt, node.calc.outCur);
+                }
+            });
+            drawCables();
+        }
+
+        function drawCables() {
+            const svg = document.getElementById('cables-layer');
+            if (!svg) return;
+            svg.querySelectorAll('.connection-cable').forEach(p => p.remove());
+
+            connections.forEach(conn => {
+                const srcEl = document.getElementById(`port-${conn.fromNode}-${conn.fromPort}`);
+                const tgtEl = document.getElementById(`port-${conn.toNode}-${conn.toPort}`);
+
+                if (srcEl && tgtEl) {
+                    const srcR = srcEl.getBoundingClientRect(), tgtR = tgtEl.getBoundingClientRect(), svgR = svg.getBoundingClientRect();
+                    const x1 = (srcR.left + srcR.width / 2 - svgR.left) / zoom, y1 = (srcR.top + srcR.height / 2 - svgR.top) / zoom;
+                    const x2 = (tgtR.left + tgtR.width / 2 - svgR.left) / zoom, y2 = (tgtR.top + tgtR.height / 2 - svgR.top) / zoom;
+                    const cOff = Math.max(Math.abs(x2 - x1) * 0.6, 60);
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${x1} ${y1} C ${x1 + cOff} ${y1}, ${x2 - cOff} ${y2}, ${x2} ${y2}`);
+                    path.setAttribute('fill', 'none');
+                    
+                    const srcNode = nodes.find(n => n.id === conn.fromNode);
+                    let grad = 'url(#grad-balance)';
+                    if (srcNode) {
+                        if (srcNode.outMode === 'card') grad = 'url(#grad-card)';
+                        if (srcNode.outMode === 'bs' || srcNode.outMode === 'usdt' || srcNode.outMode === 'ach') grad = 'url(#grad-extra)';
+                    }
+                    
+                    path.setAttribute('stroke', grad);
+                    path.setAttribute('stroke-width', '3.5');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('class', 'connection-cable');
+                    path.addEventListener('dblclick', (e) => { 
+                        e.stopPropagation(); 
+                        connections = connections.filter(c => c.id !== conn.id); 
+                        calculateFlow(); 
+                        showSnackbar("Conexión del flujo eliminada", true);
+                    });
+                    svg.appendChild(path);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
